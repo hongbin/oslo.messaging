@@ -71,6 +71,8 @@ class AMQPIncomingMessage(base.RpcIncomingMessage):
                       'unique_id': unique_id,
                       'reply_q': self.reply_q,
                       'elapsed': self.stopwatch.elapsed()})
+
+        print("rrrrrrrrrrrreply: " + str(rpc_common.serialize_msg(msg)))
         conn.direct_send(self.reply_q, rpc_common.serialize_msg(msg))
 
     def reply(self, reply=None, failure=None):
@@ -194,6 +196,10 @@ class AMQPListener(base.PollStyleListener):
                                     'msg_id': ctxt.msg_id})
         else:
             LOG.debug("received message with unique_id: %s", unique_id)
+
+        #import traceback
+        #traceback.print_stack()
+        print("rrrrrrrrrrrrrrrreceive message: " + str(message))
         self.incoming.append(AMQPIncomingMessage(self,
                                                  ctxt.to_dict(),
                                                  message,
@@ -424,11 +430,19 @@ class AMQPDriverBase(base.BaseDriver):
                                    'exchange': exchange,
                                    'topic': target.topic}
                     LOG.debug(log_msg)
+
+                    #import traceback
+                    #traceback.print_stack()
+                    print("ssssssssssssssssend msg: " + repr(msg))
                     conn.notify_send(exchange, target.topic, msg, retry=retry)
                 elif target.fanout:
                     log_msg += "FANOUT topic '%(topic)s'" % {
                         'topic': target.topic}
                     LOG.debug(log_msg)
+
+                    #import traceback
+                    #traceback.print_stack()
+                    print("ssssssssssssssssend msg: " + repr(msg))
                     conn.fanout_send(target.topic, msg, retry=retry)
                 else:
                     topic = target.topic
@@ -440,6 +454,10 @@ class AMQPDriverBase(base.BaseDriver):
                                    'exchange': exchange,
                                    'topic': topic}
                     LOG.debug(log_msg)
+
+                    #import traceback
+                    #traceback.print_stack()
+                    print("ssssssssssssssssend msg: " + repr(msg))
                     conn.topic_send(exchange_name=exchange, topic=topic,
                                     msg=msg, timeout=timeout, retry=retry)
 
